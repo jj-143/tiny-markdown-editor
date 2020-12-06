@@ -1,0 +1,2 @@
+- span's created even tho i delete the all the span's characters
+- add condition: closing tick should not be followed by non-whitespace character
