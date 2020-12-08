@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useLayoutEffect, useRef, useState } from "react"
 import ReactDOM from "react-dom"
 
 ReactDOM.render(<App />, document.getElementById("root"))
@@ -6,12 +6,20 @@ ReactDOM.render(<App />, document.getElementById("root"))
 function App() {
   return (
     <div>
+      <h1>Tiny Markdown Editor</h1>
+      <h2>supporting syntax:</h2>
+      <ul>
+        <li>
+          code - <code>`code`</code>
+        </li>
+      </ul>
       <TextField />
     </div>
   )
 }
 
 function TextField() {
+  const editorRef = useRef()
   const onKeyDown = e => {
     if (e.key === "`") {
       let selection = window.getSelection()
@@ -49,12 +57,64 @@ function TextField() {
     }
   }
 
+  // temporary here
+  const [rawMD, setRawMD] = useState("")
+
+  const makeRawLine = children => {
+    return children
+      .map(it =>
+        it.nodeName === "#text"
+          ? it.textContent.replace(/(?<!\\)`/g, "\\`")
+          : it.nodeName === "BR"
+          ? ""
+          : `\`${it.textContent}\``,
+      )
+      .join("")
+  }
+
+  const makeRawMD = root => {
+    let childNodes = Array.from(root.childNodes)
+    let startOfSecond = childNodes.length
+    for (let idx = 0; idx < childNodes.length; idx++) {
+      if (childNodes[idx].nodeName === "DIV") {
+        startOfSecond = idx
+        break
+      }
+    }
+    let firstLine = childNodes.slice(0, startOfSecond)
+    let lines = [makeRawLine(firstLine)]
+    childNodes
+      .slice(startOfSecond)
+      .forEach(div => lines.push(makeRawLine(Array.from(div.childNodes))))
+    let raw = lines.join("\n")
+    setRawMD(raw)
+  }
+
+  useLayoutEffect(() => {
+    makeRawMD(editorRef.current)
+  }, [])
+
   return (
     <React.Fragment>
-      <div className="wrapper" contentEditable="true" onKeyDown={onKeyDown}>
+      <h3>editor</h3>
+      <div
+        className="wrapper"
+        contentEditable="true"
+        onKeyDown={onKeyDown}
+        onInput={e => {
+          makeRawMD(e.target)
+        }}
+        ref={editorRef}
+      >
         before&nbsp;
         <span className={"code"}>text sample</span>
         later
+      </div>
+      <h3>raw markdown</h3>
+      <div className="rawView">
+        {rawMD.split("\n").map((it, idx) => {
+          return it === "" ? <br key={idx}></br> : <div key={idx}>{it}</div>
+        })}
       </div>
     </React.Fragment>
   )
