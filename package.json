@@ -2,7 +2,8 @@
   "name": "tiny-markdown-editor",
   "version": "1.0.0",
   "scripts": {
-    "start": "parcel ./index.html"
+    "start": "parcel ./index.html",
+    "build": "parcel build -d docs --public-url /tiny-markdown-editor ./index.html"
   },
   "license": "MIT",
   "dependencies": {
