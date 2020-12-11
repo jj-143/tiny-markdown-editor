@@ -6,7 +6,7 @@ export default class Editor {
     editor.root = element
     element.classList.add("editor")
     element.contentEditable = "true"
-    element.addEventListener("keydown", onKeyDown)
+    element.addEventListener("keydown", editor._onKeyDown.bind(editor))
     return editor
   }
 
@@ -34,6 +34,13 @@ export default class Editor {
     this.root.addEventListener("input", () => cb(this.root.textContent))
   }
 
+  _onKeyDown(e: KeyboardEvent) {
+    let change = onKeyDown(e)
+    // Generate [InputEvent] manually
+    // since it's not fired automatically when there's change
+    change && this.root.dispatchEvent(new CustomEvent("input"))
+  }
+
   _makeRawLine(children): string {
     return children
       .map(it =>
@@ -47,7 +54,7 @@ export default class Editor {
   }
 }
 
-function onKeyDown(e: KeyboardEvent) {
+function onKeyDown(e: KeyboardEvent): boolean {
   if (e.key === "`") {
     let selection = window.getSelection()
     let node = selection.focusNode as ChildNode
@@ -81,6 +88,11 @@ function onKeyDown(e: KeyboardEvent) {
       range.setStart(after, 1)
       range.setEnd(after, 1)
       sel.addRange(range)
+
+      // contents modified,
+      // [InputEvent] should be fired
+      return true
     }
   }
+  return false
 }
