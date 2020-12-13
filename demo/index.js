@@ -22,13 +22,21 @@ function App() {
       <h2>supporting syntax:</h2>
       <ul>
         <li>
-          code - <code>`code`</code>
+          <code>`text`</code> : <span className="code">code</span>
+        </li>
+        <li>
+          <code>**text**</code> : <span className="bold">bold</span>
+        </li>
+        <li>
+          <code>*text*</code> : <span className="italic">italic</span>
+        </li>
+        <li>
+          <code>~text~</code> : <span className="strike">strikethrough</span>
         </li>
       </ul>
 
       <h3>editor</h3>
       <div id="editor" />
-
       <h3>raw markdown</h3>
       <div className="rawView">
         {rawMD.split("\n").map((it, idx) => {
